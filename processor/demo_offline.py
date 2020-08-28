@@ -43,11 +43,12 @@ class DemoOffline(IO):
                             video_label_name, intensity, video)
 
         # visualize
-        for image in images:
+        for i, image in enumerate(images):
             image = image.astype(np.uint8)
-            cv2.imshow("ST-GCN", image)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+            cv2.imwrite(f'ss{i}.png', image)
+            # cv2.imshow("ST-GCN", image)
+            # if cv2.waitKey(1) & 0xFF == ord('q'):
+            #     break
 
     def predict(self, data):
         # forward
