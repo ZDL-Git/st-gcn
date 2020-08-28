@@ -18,4 +18,5 @@ POSE_FOLDER="pose/"
 COCO_FOLDER=${POSE_FOLDER}"coco/"
 OUT_FOLDER="models/${COCO_FOLDER}"
 COCO_MODEL=${COCO_FOLDER}"pose_iter_440000.caffemodel"
-wget -c ${OPENPOSE_URL}${COCO_MODEL} -P ${OUT_FOLDER}
+# wget -c ${OPENPOSE_URL}${COCO_MODEL} -P ${OUT_FOLDER}
+wget -c https://media.githubusercontent.com/media/foss-for-synopsys-dwc-arc-processors/synopsys-caffe-models/master/caffe_models/openpose/caffe_model/pose_iter_440000.caffemodel -P ${OUT_FOLDER}
