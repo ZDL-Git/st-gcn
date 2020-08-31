@@ -145,6 +145,7 @@ class DemoOffline(IO):
             opWrapper.emplaceAndPop([datum])
             multi_pose = datum.poseKeypoints  # (num_person, num_joint, 3)
             if len(multi_pose.shape) != 3:
+                print(f'index {frame_index + 1} pose empty!')
                 continue
 
             # normalization
