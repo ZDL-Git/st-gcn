@@ -113,7 +113,12 @@ class DemoOffline(IO):
         opWrapper.start()
         self.model.eval()
         video_capture = cv2.VideoCapture(self.arg.video)
-        video_length = int(video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
+        
+        def _count_frames(cap=None):
+            cap.set(cv2.CAP_PROP_POS_AVI_RATIO,1)
+            count = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
+            return count
+        video_length = _count_frames(video_capture)
         pose_tracker = naive_pose_tracker(data_frame=video_length)
 
         # pose estimation
