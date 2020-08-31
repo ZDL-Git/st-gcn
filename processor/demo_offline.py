@@ -114,13 +114,13 @@ class DemoOffline(IO):
         self.model.eval()
         video_capture = cv2.VideoCapture(self.arg.video)
         
-        def _count_frames(cap):
-            org_pos = cap.get(cv2.CAP_PROP_POS_AVI_RATIO)
+        def _count_frames(video):
+            cap = cv2.VideoCapture(video)
             cap.set(cv2.CAP_PROP_POS_AVI_RATIO,1)
             count = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
-            cap.set(cv2.CAP_PROP_POS_AVI_RATIO,org_pos)
             return count
-        video_length = _count_frames(video_capture)
+
+        video_length = _count_frames(self.arg.video)
         pose_tracker = naive_pose_tracker(data_frame=video_length)
 
         # pose estimation
