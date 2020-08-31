@@ -132,6 +132,7 @@ class DemoOffline(IO):
             # get image
             ret, orig_image = video_capture.read()
             if orig_image is None:
+                print('orig_image is None!')
                 break
             source_H, source_W, _ = orig_image.shape
             orig_image = cv2.resize(
