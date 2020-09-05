@@ -149,6 +149,7 @@ class DemoOffline(IO):
                 print(f'index {frame_index + 1} pose empty!')
                 continue
 
+            print(multi_pose.shape)
             # normalization
             multi_pose[:, :, 0] = multi_pose[:, :, 0]/W
             multi_pose[:, :, 1] = multi_pose[:, :, 1]/H
