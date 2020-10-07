@@ -132,7 +132,7 @@ class DemoOffline(IO):
             # get image
             ret, orig_image = video_capture.read()
             if orig_image is None:
-                print('orig_image is None!')
+                print(f'frame {frame_index+1} orig_image is None!')
                 break
             source_H, source_W, _ = orig_image.shape
             orig_image = cv2.resize(
@@ -146,7 +146,7 @@ class DemoOffline(IO):
             opWrapper.emplaceAndPop([datum])
             multi_pose = datum.poseKeypoints  # (num_person, num_joint, 3)
             if len(multi_pose.shape) != 3:
-                print(f'index {frame_index + 1} pose empty!')
+                print(f'frame {frame_index+1} pose empty, shape: {multi_pose.shape}')
                 continue
 
             print(multi_pose.shape)
@@ -161,7 +161,7 @@ class DemoOffline(IO):
             pose_tracker.update(multi_pose, frame_index)
             frame_index += 1
 
-            print('Pose estimation ({}/{}).'.format(frame_index, video_length))
+            print('Pose estimation ({}/{}) finished.'.format(frame_index, video_length))
 
         data_numpy = pose_tracker.get_skeleton_sequence()
         return video, data_numpy
