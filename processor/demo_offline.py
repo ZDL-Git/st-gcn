@@ -16,10 +16,11 @@ import tools.utils as utils
 
 import cv2
 
+
 class DemoOffline(IO):
 
     def start(self):
-        
+
         # initiate
         label_name_path = './resource/kinetics_skeleton/label_name.txt'
         with open(label_name_path) as f:
@@ -37,15 +38,15 @@ class DemoOffline(IO):
 
         # model predict
         voting_label_name, video_label_name, output, intensity = self.predict(data)
-
+        print(voting_label_name, video_label_name)
         # render the video
         images = self.render_video(data_numpy, voting_label_name,
-                            video_label_name, intensity, video)
+                                   video_label_name, intensity, video)
 
         # visualize
         for i, image in enumerate(images):
             image = image.astype(np.uint8)
-            cv2.imwrite(f'ss{i}.png', image)
+            cv2.imwrite(f'action_recognition{i}.png', image)
             # cv2.imshow("ST-GCN", image)
             # if cv2.waitKey(1) & 0xFF == ord('q'):
             #     break
@@ -55,7 +56,7 @@ class DemoOffline(IO):
         output, feature = self.model.extract_feature(data)
         output = output[0]
         feature = feature[0]
-        intensity = (feature*feature).sum(dim=0)**0.5
+        intensity = (feature * feature).sum(dim=0) ** 0.5
         intensity = intensity.cpu().detach().numpy()
 
         # get result
@@ -103,7 +104,6 @@ class DemoOffline(IO):
             print('Can not find Openpose Python API.')
             return
 
-
         video_name = self.arg.video.split('/')[-1].split('.')[0]
 
         # initiate
@@ -113,10 +113,10 @@ class DemoOffline(IO):
         opWrapper.start()
         self.model.eval()
         video_capture = cv2.VideoCapture(self.arg.video)
-        
+
         def _count_frames(video):
             cap = cv2.VideoCapture(video)
-            cap.set(cv2.CAP_PROP_POS_AVI_RATIO,1)
+            cap.set(cv2.CAP_PROP_POS_AVI_RATIO, 1)
             count = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
             return count
 
@@ -127,12 +127,12 @@ class DemoOffline(IO):
         start_time = time.time()
         frame_index = 0
         video = list()
-        while(True):
+        while (True):
 
             # get image
             ret, orig_image = video_capture.read()
             if orig_image is None:
-                print(f'frame {frame_index+1} orig_image is None!')
+                print(f'frame {frame_index + 1} orig_image is None!')
                 break
             source_H, source_W, _ = orig_image.shape
             orig_image = cv2.resize(
@@ -146,13 +146,13 @@ class DemoOffline(IO):
             opWrapper.emplaceAndPop([datum])
             multi_pose = datum.poseKeypoints  # (num_person, num_joint, 3)
             if len(multi_pose.shape) != 3:
-                print(f'frame {frame_index+1} pose empty, shape: {multi_pose.shape}')
+                print(f'frame {frame_index + 1} pose empty, shape: {multi_pose.shape}')
                 continue
 
             print(multi_pose.shape)
             # normalization
-            multi_pose[:, :, 0] = multi_pose[:, :, 0]/W
-            multi_pose[:, :, 1] = multi_pose[:, :, 1]/H
+            multi_pose[:, :, 0] = multi_pose[:, :, 0] / W
+            multi_pose[:, :, 1] = multi_pose[:, :, 1] / H
             multi_pose[:, :, 0:2] = multi_pose[:, :, 0:2] - 0.5
             multi_pose[:, :, 0][multi_pose[:, :, 2] == 0] = 0
             multi_pose[:, :, 1][multi_pose[:, :, 2] == 0] = 0
@@ -164,6 +164,7 @@ class DemoOffline(IO):
             print('Pose estimation ({}/{}) finished.'.format(frame_index, video_length))
 
         data_numpy = pose_tracker.get_skeleton_sequence()
+        print(f'data_numpy shape: {data_numpy.shape}')
         return video, data_numpy
 
     @staticmethod
@@ -199,6 +200,7 @@ class DemoOffline(IO):
         # endregion yapf: enable
 
         return parser
+
 
 class naive_pose_tracker():
     """ A simple tracker for recording person poses and generating skeleton sequences.
@@ -247,7 +249,7 @@ class naive_pose_tracker():
 
                 # padding zero if the trace is fractured
                 pad_mode = 'interp' if latest_frame == self.latest_frame else 'zero'
-                pad = current_frame-latest_frame-1
+                pad = current_frame - latest_frame - 1
                 new_trace = self.cat_pose(trace, p, pad, pad_mode)
                 self.trace_info[matching_trace] = (new_trace, current_frame)
 
@@ -290,8 +292,8 @@ class naive_pose_tracker():
                     (trace, np.zeros((pad, num_joint, 3))), 0)
             elif pad_mode == 'interp':
                 last_pose = trace[-1]
-                coeff = [(p+1)/(pad+1) for p in range(pad)]
-                interp_pose = [(1-c)*last_pose + c*pose for c in coeff]
+                coeff = [(p + 1) / (pad + 1) for p in range(pad)]
+                interp_pose = [(1 - c) * last_pose + c * pose for c in coeff]
                 trace = np.concatenate((trace, interp_pose), 0)
         new_trace = np.concatenate((trace, [pose]), 0)
         return new_trace
@@ -302,7 +304,7 @@ class naive_pose_tracker():
         last_pose_xy = trace[-1, :, 0:2]
         curr_pose_xy = pose[:, 0:2]
 
-        mean_dis = ((((last_pose_xy - curr_pose_xy)**2).sum(1))**0.5).mean()
+        mean_dis = ((((last_pose_xy - curr_pose_xy) ** 2).sum(1)) ** 0.5).mean()
         wh = last_pose_xy.max(0) - last_pose_xy.min(0)
         scale = (wh[0] * wh[1]) ** 0.5 + 0.0001
         is_close = mean_dis < scale * self.max_frame_dis
